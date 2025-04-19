@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - COMPOSER_MEMORY_LIMIT=-1
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
       - './storage:/var/www/html/storage'
     environment:
@@ -26,6 +29,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - COMPOSER_MEMORY_LIMIT=-1
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     command: [ "php", "/var/www/html/artisan", "schedule:work" ]
     volumes:
       - './storage:/var/www/html/storage'
@@ -49,6 +55,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - COMPOSER_MEMORY_LIMIT=-1
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     command: [ "php", "/var/www/html/artisan", "queue:work", "--tries=3", "--sleep=3" ]
     volumes:
       - './storage:/var/www/html/storage'
