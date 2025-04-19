@@ -1,0 +1,68 @@
+services:
+  app:
+    image: 'serversideup/php:8.3-fpm-nginx'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - './storage:/var/www/html/storage'
+    environment:
+      AUTORUN_ENABLED: 'true'
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: '${APP_KEY}'
+      DB_CONNECTION: '${DB_CONNECTION}'
+      DB_HOST: '${DB_HOST}'
+      DB_PORT: '${DB_PORT}'
+      DB_DATABASE: '${DB_DATABASE}'
+      DB_USERNAME: '${DB_USERNAME}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      REDIS_HOST: '${REDIS_HOST}'
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      REDIS_PORT: '${REDIS_PORT}'
+      
+  scheduler:
+    image: 'serversideup/php:8.3-fpm-nginx'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "php", "/var/www/html/artisan", "schedule:work" ]
+    volumes:
+      - './storage:/var/www/html/storage'
+    environment:
+      PHP_FPM_POOL_NAME: app_scheduler
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: '${APP_KEY}'
+      DB_CONNECTION: '${DB_CONNECTION}'
+      DB_HOST: '${DB_HOST}'
+      DB_PORT: '${DB_PORT}'
+      DB_DATABASE: '${DB_DATABASE}'
+      DB_USERNAME: '${DB_USERNAME}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      REDIS_HOST: '${REDIS_HOST}'
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      REDIS_PORT: '${REDIS_PORT}'
+
+  queue:
+    image: 'serversideup/php:8.3-fpm-nginx'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "php", "/var/www/html/artisan", "queue:work", "--tries=3", "--sleep=3" ]
+    volumes:
+      - './storage:/var/www/html/storage'
+    environment:
+      PHP_FPM_POOL_NAME: app_queue
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: '${APP_KEY}'
+      DB_CONNECTION: '${DB_CONNECTION}'
+      DB_HOST: '${DB_HOST}'
+      DB_PORT: '${DB_PORT}'
+      DB_DATABASE: '${DB_DATABASE}'
+      DB_USERNAME: '${DB_USERNAME}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      REDIS_HOST: '${REDIS_HOST}'
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      REDIS_PORT: '${REDIS_PORT}' 

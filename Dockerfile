@@ -1,36 +1,24 @@
-FROM php:8.2-cli
+FROM serversideup/php:8.3-fpm-nginx
 
-# Instala dependências do sistema e extensões do PHP
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    libzip-dev \
-    libicu-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl
+ENV PHP_OPCACHE_ENABLE=1
 
-# Instala Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+USER root
 
-# Define a pasta de trabalho
-WORKDIR /var/www
+# Instala Node.js
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
 
 # Copia os arquivos da aplicação
-COPY . .
+COPY --chown=www-data:www-data . /var/www/html
 
-# Instala as dependências do Laravel
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+USER www-data
 
-# Permissões para o Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Instala dependências do frontend e compila assets
+RUN npm install
+RUN npm run build
 
-# Expondo a porta que o Artisan vai usar
-EXPOSE 80
+# Instala dependências do PHP otimizadas para produção
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Comando para iniciar o Laravel com o servidor embutido
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"] 
+# O container ServersideUp já configura o servidor web
+# na porta 8080 e inicia o PHP-FPM e Nginx automaticamente 
