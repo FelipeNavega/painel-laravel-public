@@ -1,0 +1,27 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - COMPOSER_MEMORY_LIMIT=-1
+    volumes:
+      - './storage:/var/www/html/storage'
+    environment:
+      PHP_MAX_EXECUTION_TIME: 300
+      PHP_MEMORY_LIMIT: 512M
+      AUTORUN_ENABLED: 'true'
+      AUTORUN_LARAVEL_MIGRATION: 'true'
+      AUTORUN_LARAVEL_STORAGE_LINK: 'true'
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      SERVICE_FQDN_APP: /
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s 

@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.env
+.env.example
+node_modules
+vendor
+storage/app/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+README.md
+README-coolify.md
+*.log
+tests
+phpunit.xml 

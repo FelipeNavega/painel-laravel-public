@@ -27,6 +27,7 @@ Este guia explica como configurar este projeto Laravel para deploy no Coolify.
 
 - Use o arquivo `docker-compose.yml` deste projeto como base
 - Certifique-se de que as variáveis de ambiente estão configuradas corretamente
+- Marque a opção "Connect to Predefined Network" se estiver usando recursos externos como bancos de dados
 - Clique em "Save"
 
 ### 4. Configure o domínio:
@@ -46,7 +47,32 @@ Este guia explica como configurar este projeto Laravel para deploy no Coolify.
 
 - Clique em "Deploy" para iniciar o processo de build e deploy
 
-## Solução de problemas de permissão
+## Solucionando problemas comuns
+
+### Falha no comando composer install
+
+Se o build falhar durante o comando `composer install` com um erro como:
+
+```
+failed to solve: process "/bin/sh -c composer install --no-interaction --optimize-autoloader --no-dev" did not complete successfully
+```
+
+Verifique:
+
+1. **Repositório Composer**: Certifique-se de que o Coolify tem acesso aos repositórios composer necessários.
+
+2. **Memória**: Se o composer estiver falhando por falta de memória, você pode:
+   - Aumentar a memória disponível para o Coolify na configuração do servidor
+   - Usar a variável de ambiente `COMPOSER_MEMORY_LIMIT=-1` no Dockerfile
+
+3. **Permissões**: Verifique se as permissões estão corretas:
+   ```
+   chown -R www-data:www-data /var/www/html
+   ```
+
+4. **Pacotes privados**: Se você estiver usando pacotes privados, configure o auth.json corretamente.
+
+### Problemas de permissão com volumes
 
 Se encontrar problemas de permissão com o volume de armazenamento:
 
@@ -66,6 +92,7 @@ Para adicionar um banco de dados:
 2. Clique em "+ New" para adicionar um novo recurso
 3. Selecione o banco de dados desejado (MySQL, PostgreSQL, etc.)
 4. Use as credenciais geradas nas configurações do seu aplicativo Laravel
+5. **Importante**: Certifique-se de que a opção "Connect to Predefined Network" esteja marcada em ambos os recursos (aplicação e banco de dados)
 
 ## Docker Compose
 
