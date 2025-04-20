@@ -1,40 +1,47 @@
-# Estágio de construção para dependências Composer
-FROM composer:2.6 as composer
+# Estágio 1: Construção com Composer + extensões necessárias
+FROM php:8.2-cli AS composer
+
+# Instalar dependências para extensão intl
+RUN apt-get update && apt-get install -y \
+  libicu-dev \
+  zip \
+  unzip \
+  git
+
+# Instalar a extensão intl
+RUN docker-php-ext-configure intl && \
+  docker-php-ext-install intl
+
+# Instalar Composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
+
+# Copiar arquivos de dependências
 COPY composer.* ./
 
-# Instalação de dependências (para melhor uso de cache)
+# Instalar dependências
 RUN composer install --no-scripts --no-autoloader --no-dev
 
-# Copia o resto do código da aplicação
+# Copiar resto do código
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
-# Estágio principal com PHP e Nginx
+# Estágio 2: Imagem final com PHP-FPM e Nginx
 FROM php:8.2-fpm
 
-# Instalar dependências do sistema e extensões PHP
+# Instalar dependências
 RUN apt-get update && apt-get install -y \
   git \
   curl \
   libpng-dev \
   libonig-dev \
   libxml2-dev \
-  libzip-dev \
+  libicu-dev \
   zip \
   unzip \
   nginx \
-  && docker-php-ext-install \
-  pdo_mysql \
-  mbstring \
-  exif \
-  pcntl \
-  bcmath \
-  gd \
-  dom \
-  xml \
-  zip \
+  && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -45,34 +52,16 @@ COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 # Configurar diretório de trabalho
 WORKDIR /var/www/html
 
-# Copiar arquivos do projeto e dependências
-COPY --from=composer /app /var/www/html
-
-# Gerar chave da aplicação Laravel se necessário
-RUN if [ -f ".env" ] && [ ! -z "$(grep APP_KEY=base64:.* .env)" ]; then \
-  echo "App key exists"; \
-  elif [ -f ".env" ]; then \
-  php artisan key:generate; \
-  else \
-  cp .env.example .env && php artisan key:generate; \
-  fi
+# Copiar arquivos do projeto
+COPY . .
+COPY --from=composer /app/vendor /var/www/html/vendor
 
 # Ajustar permissões
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
   && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Script de inicialização
-COPY --chown=root:root <<'EOF' /usr/local/bin/start.sh
-#!/bin/bash
-set -e
-
-# Iniciar PHP-FPM em background
-php-fpm -D
-
-# Iniciar Nginx em foreground
-nginx -g 'daemon off;'
-EOF
-
+# Copiar e configurar script de inicialização
+COPY docker/start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
 # Expor porta 80
