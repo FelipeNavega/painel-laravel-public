@@ -1,36 +1,42 @@
-# Estágio 1: Construção com Composer + extensões necessárias
-FROM php:8.2-cli AS composer
+# Estágio 1: PHP CLI para build e instalação de dependências
+FROM php:8.2-cli AS builder
 
-# Instalar dependências para extensão intl
+# Instalar dependências para extensões necessárias
 RUN apt-get update && apt-get install -y \
+  git \
+  curl \
+  libpng-dev \
+  libonig-dev \
+  libxml2-dev \
   libicu-dev \
   zip \
-  unzip \
-  git
+  unzip
 
-# Instalar a extensão intl
-RUN docker-php-ext-configure intl && \
-  docker-php-ext-install intl
+# Instalar todas as extensões PHP necessárias
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl
 
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
+# Configurar diretório de trabalho
 WORKDIR /app
 
 # Copiar arquivos de dependências
 COPY composer.* ./
 
-# Instalar dependências
+# Instalar dependências (agora com a extensão intl disponível)
 RUN composer install --no-scripts --no-autoloader --no-dev
 
-# Copiar resto do código
+# Copiar todo o código da aplicação
 COPY . .
+
+# Gerar autoloader otimizado
 RUN composer dump-autoload --optimize --no-dev
 
-# Estágio 2: Imagem final com PHP-FPM e Nginx
+# Estágio 2: PHP-FPM para execução da aplicação
 FROM php:8.2-fpm
 
-# Instalar dependências
+# Instalar dependências para extensões necessárias
 RUN apt-get update && apt-get install -y \
   git \
   curl \
@@ -52,9 +58,8 @@ COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 # Configurar diretório de trabalho
 WORKDIR /var/www/html
 
-# Copiar arquivos do projeto
-COPY . .
-COPY --from=composer /app/vendor /var/www/html/vendor
+# Copiar todo o código da aplicação e dependências do estágio builder
+COPY --from=builder /app /var/www/html
 
 # Ajustar permissões
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
