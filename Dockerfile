@@ -1,19 +1,19 @@
-# Estágio 2: PHP-FPM para execução da aplicação
-FROM php:8.2-fpm
+# Estágio 1: Construção
+FROM php:8.2-cli AS builder
 
-# Instalar dependências para extensões necessárias
+# Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
-    nginx \
-    # Bibliotecas de desenvolvimento
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
     libicu-dev \
     libzip-dev \
-    libfreetype6-dev \    # DEV para FreeType
-    libjpeg62-turbo-dev \ # DEV para JPEG
-    libpng-dev \          # DEV para PNG
-    # Bibliotecas de runtime
-    libfreetype6 \
-    libjpeg62-turbo \
-    libpng16-16 \
+    zip \
+    unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
@@ -24,28 +24,18 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         zip \
-        dom \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+        dom
 
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
-
-# Copiar arquivos de dependências primeiro (para melhor uso do cache)
 COPY composer.* ./
-
-# Instalar dependências com verificação de extensões
-RUN composer check-platform-reqs && \
-    composer install --no-scripts --no-autoloader --no-dev -vvv
-
-# Copiar todo o código fonte
+RUN composer install --no-scripts --no-autoloader --no-dev
 COPY . .
-
-# Otimizar autoloader
 RUN composer dump-autoload --optimize --no-dev
 
-# Estágio de produção final
+# Estágio 2: Produção
 FROM php:8.2-fpm
 
 # Instalar dependências de runtime
@@ -53,6 +43,9 @@ RUN apt-get update && apt-get install -y \
     nginx \
     libicu-dev \
     libzip-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     libfreetype6 \
     libjpeg62-turbo \
     libpng16-16 \
@@ -67,24 +60,18 @@ RUN apt-get update && apt-get install -y \
         intl \
         zip \
         dom \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Configurar Nginx
+# Configurar Nginx e aplicação
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
 WORKDIR /var/www/html
-
-# Copiar aplicação do estágio de construção
 COPY --from=builder /app /var/www/html
 
-# Configurar permissões
-RUN chown -R www-data:www-data \
-    /var/www/html/storage \
-    /var/www/html/bootstrap/cache \
-    && chmod -R 775 \
-    /var/www/html/storage \
-    /var/www/html/bootstrap/cache
+# Ajustar permissões
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Script de inicialização
 COPY docker/start.sh /usr/local/bin/
