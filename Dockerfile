@@ -1,19 +1,19 @@
-# Estágio de construção com todas as dependências necessárias
-FROM php:8.2-cli AS builder
+# Estágio 2: PHP-FPM para execução da aplicação
+FROM php:8.2-fpm
 
-# Instalar dependências do sistema
+# Instalar dependências para extensões necessárias
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
+    nginx \
+    # Bibliotecas de desenvolvimento
     libicu-dev \
     libzip-dev \
-    zip \
-    unzip \
+    libfreetype6-dev \    # DEV para FreeType
+    libjpeg62-turbo-dev \ # DEV para JPEG
+    libpng-dev \          # DEV para PNG
+    # Bibliotecas de runtime
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng16-16 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         zip \
-        dom
+        dom \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
