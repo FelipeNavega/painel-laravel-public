@@ -1,6 +1,10 @@
 # Estágio 1: Construção com autenticação segura
 FROM php:8.2-cli AS builder
 
+# Declaração das variáveis de build (serão injetadas pelo Coolify)
+ARG COMPOSER_USERNAME
+ARG COMPOSER_PASSWORD
+
 # Instalar dependências do sistema + extensões PHP
 RUN apt-get update && apt-get install -y \
     git \
@@ -34,14 +38,12 @@ WORKDIR /app
 # Copiar arquivos de dependências primeiro (para cache)
 COPY composer.* ./
 
-# Configurar autenticação via variáveis de ambiente (usando BuildKit)
-RUN --mount=type=secret,id=COMPOSER_AUTH \
-    composer config repositories.filapanel/classic-theme composer https://classic-theme.filapanel.com && \
-    composer config http-basic.classic-theme.filapanel.com ARG COMPOSER_USERNAME ARG COMPOSER_PASSWORD
+# Configurar autenticação via variáveis de build
+RUN composer config repositories.filapanel/classic-theme composer https://classic-theme.filapanel.com && \
+    composer config http-basic.classic-theme.filapanel.com "${COMPOSER_USERNAME}" "${COMPOSER_PASSWORD}"
 
-# Instalar dependências
-RUN --mount=type=secret,id=COMPOSER_AUTH \
-    composer install --no-scripts --no-autoloader --no-dev
+# Instalar dependências (as variáveis já estão configuradas)
+RUN composer install --no-scripts --no-autoloader --no-dev
 
 # Copiar todo o código fonte
 COPY . .
