@@ -37,8 +37,7 @@ COPY composer.* ./
 # Configurar autenticação via variáveis de ambiente (usando BuildKit)
 RUN --mount=type=secret,id=COMPOSER_AUTH \
     composer config repositories.filapanel/classic-theme composer https://classic-theme.filapanel.com && \
-    composer config http-basic.classic-theme.filapanel.com ARG COMPOSER_USERNAME ARG COMPOSER_PASSWORD && \
-    composer require filapanel/classic-theme
+    composer config http-basic.classic-theme.filapanel.com ARG COMPOSER_USERNAME ARG COMPOSER_PASSWORD
 
 # Instalar dependências
 RUN --mount=type=secret,id=COMPOSER_AUTH \
