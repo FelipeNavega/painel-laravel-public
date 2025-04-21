@@ -61,14 +61,15 @@ RUN apt-get update && apt-get install -y \
     nginx \
     libicu-dev \
     libzip-dev \
-    # Pacotes DEV necessários para GD
+    libxml2-dev \
+    libxslt-dev \ 
     libfreetype6-dev \      
     libjpeg62-turbo-dev \   
     libpng-dev \
     libonig-dev \               
-    # Runtime libraries
     libfreetype6 \
     libjpeg62-turbo \
+    libxml2 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
