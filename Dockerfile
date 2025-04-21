@@ -54,14 +54,18 @@ RUN composer dump-autoload --optimize --no-dev
 # Estágio 2: Produção (imagem final leve)
 FROM php:8.2-fpm
 
-# Instalar dependências de runtime
+# Instalar dependências de runtime + DEV para compilação de extensões
 RUN apt-get update && apt-get install -y \
     nginx \
     libicu-dev \
     libzip-dev \
+    # Pacotes DEV necessários para GD
+    libfreetype6-dev \      
+    libjpeg62-turbo-dev \   
+    libpng-dev \             
+    # Runtime libraries
     libfreetype6 \
     libjpeg62-turbo \
-    libpng16-16 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
@@ -75,6 +79,7 @@ RUN apt-get update && apt-get install -y \
     dom \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Configurar Nginx
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
