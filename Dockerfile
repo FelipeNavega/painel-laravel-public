@@ -33,6 +33,7 @@ RUN apt-get update && apt-get install -y \
     dom
 
 # Instalar Composer
+RUN apt-get update && apt-get install -y curl
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
@@ -91,12 +92,31 @@ COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www/html
 
+RUN apt-get update && apt-get install -y \
+    procps \
+    net-tools \
+    iproute2 \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:80/ || exit 1
+
 # Copiar aplicação do estágio de construção
 COPY --from=builder /app /var/www/html
+
+# Criar diretório para logs do PHP-FPM
+RUN mkdir -p /var/log/php-fpm && \
+    touch /var/log/php-fpm.log && \
+    chown -R www-data:www-data /var/log/php-fpm
 
 # Ajustar permissões
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+# Verificar a configuração do PHP-FPM
+RUN php-fpm -t
 
 # Script de inicialização
 COPY docker/start.sh /usr/local/bin/
