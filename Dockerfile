@@ -62,7 +62,8 @@ RUN apt-get update && apt-get install -y \
     # Pacotes DEV necessários para GD
     libfreetype6-dev \      
     libjpeg62-turbo-dev \   
-    libpng-dev \             
+    libpng-dev \
+    libonig-dev \               
     # Runtime libraries
     libfreetype6 \
     libjpeg62-turbo \
