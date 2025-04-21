@@ -1,37 +1,65 @@
-# Estágio 1: Build com Composer
-FROM composer:2.6 AS composer
+# Estágio 1: Construção com autenticação segura
+FROM php:8.2-cli AS builder
+
+# Instalar dependências do sistema + extensões PHP
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    libicu-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    intl \
+    zip \
+    dom
+
+# Instalar Composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# PRIMEIRO: Copiar o composer.json e composer.lock (se existir)
-COPY composer.json composer.lock* ./
+# Copiar arquivos de dependências primeiro (para cache)
+COPY composer.* ./
 
-# DEPOIS: Configurar o repositório e credenciais
-RUN composer config repositories.filapanel/classic-theme composer https://classic-theme.filapanel.com
-RUN composer config http-basic.classic-theme.filapanel.com contato@criawebstudio.com.br 080cc89b-3406-497a-b3bf-666019fb5629
+# Configurar autenticação via variáveis de ambiente (usando BuildKit)
+RUN --mount=type=secret,id=COMPOSER_AUTH \
+    composer config repositories.filapanel/classic-theme composer https://classic-theme.filapanel.com && \
+    composer config http-basic.classic-theme.filapanel.com "$(cat /run/secrets/COMPOSER_USERNAME)" "$(cat /run/secrets/COMPOSER_PASSWORD)"
 
 # Instalar dependências
-RUN composer install --no-scripts --no-autoloader --no-dev
+RUN --mount=type=secret,id=COMPOSER_AUTH \
+    composer install --no-scripts --no-autoloader --no-dev
 
-# Copiar o restante do código-fonte
+# Copiar todo o código fonte
 COPY . .
 
 # Otimizar autoloader
 RUN composer dump-autoload --optimize --no-dev
 
-# Estágio 2: Imagem final
+# Estágio 2: Produção (imagem final leve)
 FROM php:8.2-fpm
 
-# Instalar dependências do sistema
+# Instalar dependências de runtime
 RUN apt-get update && apt-get install -y \
     nginx \
     libicu-dev \
     libzip-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng16-16 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
@@ -52,12 +80,12 @@ COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www/html
 
-# Copiar a aplicação do estágio composer
-COPY --from=composer /app /var/www/html
+# Copiar aplicação do estágio de construção
+COPY --from=builder /app /var/www/html
 
-# Configurar permissões
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Ajustar permissões
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Script de inicialização
 COPY docker/start.sh /usr/local/bin/
