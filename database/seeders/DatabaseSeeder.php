@@ -19,19 +19,19 @@ class DatabaseSeeder extends Seeder
         $sql_path = database_path('municipios_estados_BR.sql');
         DB::unprepared(file_get_contents($sql_path));
 
-        User::create([
-            'name' => 'Admin',
-            'type' => UserTypeEnum::ADMIN,
-            'email' => 'skay_1994@yahoo.com.br',
-            'password' => 'VddE!-Dn@tJIaxl3Pse8'
-        ]);
+        // User::create([
+        //     'name' => 'Admin',
+        //     'type' => UserTypeEnum::ADMIN,
+        //     'email' => 'skay_1994@yahoo.com.br',
+        //     'password' => 'VddE!-Dn@tJIaxl3Pse8'
+        // ]);
 
-//        User::create([
-//            'name' => 'Admin',
-//            'type' => UserTypeEnum::ADMIN,
-//            'email' => 'admin@email.com.br',
-//            'password' => 'VddE!-Dn@tJIaxl3Pse8'
-//        ]);
+       User::create([
+           'name' => 'Admin',
+           'type' => UserTypeEnum::ADMIN,
+           'email' => 'admin@email.com.br',
+           'password' => 'VddE!-Dn@tJIaxl3Pse8'
+       ]);
 
         User::create([
             'name' => 'Parceiro',
