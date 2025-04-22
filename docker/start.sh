@@ -1,14 +1,17 @@
 #!/bin/bash
 set -e
 
-# Iniciar PHP-FPM em background
+# Inicia PHP-FPM em foreground
 php-fpm -D
 
-# Verificar se o PHP-FPM iniciou corretamente
-if ! ps aux | grep -q "php-fpm: master process" | grep -v grep; then
-    echo "Erro: PHP-FPM não iniciou corretamente"
+# Aguarda 2 segundos para garantir inicialização
+sleep 2
+
+# Verifica se o PHP-FPM está rodando
+if ! pgrep "php-fpm" > /dev/null; then
+    echo "ERRO: PHP-FPM não iniciou"
     exit 1
 fi
 
-# Iniciar Nginx em foreground (mantém o container rodando)
+# Inicia Nginx em foreground
 nginx -g 'daemon off;'

@@ -38,6 +38,15 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+# Garante que o diretório de run do PHP-FPM existe
+RUN mkdir -p /var/run/php && \
+    chown -R www-data:www-data /var/run/php
+
+# Corrige permissões do socket
+RUN sed -i 's/;listen.mode = 0660/listen.mode = 0660/g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's/listen = 127.0.0.1:9000/listen = \/var\/run\/php\/php-fpm.sock/g' /usr/local/etc/php-fpm.d/www.conf
+
+
 # Copiar arquivos de dependências primeiro (para cache)
 COPY composer.* ./
 
