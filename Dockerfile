@@ -116,6 +116,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 RUN php-fpm -t
 
 # Script de inicialização
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini
+
 COPY docker/start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
