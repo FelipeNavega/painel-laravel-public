@@ -17,21 +17,22 @@ return new class extends Migration
         Schema::create('simulations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Form::class)->index()->nullable();
-            $table->foreignId('created_by')->index()
-                ->nullable()->constrained('users');
+            $table->foreignId('created_by')->index()->nullable()->constrained('users');
             $table->string('form_type')->nullable()->index();
             $table->foreignIdFor(MunicipiosEstados::class)->nullable()->index();
             $table->string('name');
             $table->string('email')->index();
             $table->string('phone');
             $table->string('document')->nullable()->index();
-            $table->json('answers')->nullable()->index();
 
+            // Coluna JSON corrigida
+            $table->json('answers')->nullable();
+
+            // Índices otimizados
             $table->index(['created_by', 'form_type', 'form_id']);
-            $table->index(['created_by','form_type']);
-            $table->index(['created_by','form_id']);
             $table->index(['created_by', 'document']);
             $table->index(['created_by', 'municipios_estados_id']);
+
             $table->timestamps();
         });
     }
