@@ -43,7 +43,7 @@ class PartnerPanelProvider extends PanelProvider
             ->passwordReset()
             ->path('/')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#205a52'),
             ])
             ->discoverResources(in: app_path('Filament/Partner/Resources'), for: 'App\\Filament\\Partner\\Resources')
             ->discoverPages(in: app_path('Filament/Partner/Pages'), for: 'App\\Filament\\Partner\\Pages')
