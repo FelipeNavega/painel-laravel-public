@@ -30,8 +30,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->favicon('https://criawebstudio.com.br/wp-content/uploads/2025/03/favicon-maua.png')
-            ->brandLogo('https://criawebstudio.com.br/wp-content/uploads/2025/03/maua-branco.png')
+            ->favicon('https://criawebstudio.com.br/wp-content/uploads/2025/03/ico-2.png')
+            ->brandLogo('https://criawebstudio.com.br/wp-content/uploads/2025/03/logo-7-2.png')
             ->brandLogoHeight('2.5rem')
 //            ->darkMode()
             ->id('admin')
@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->profile()
             ->colors([
-                'primary' => Color::hex('#205a52'),
+                'primary' => Color::hex('#131199'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
