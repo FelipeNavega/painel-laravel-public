@@ -118,7 +118,7 @@ class Register extends \Filament\Pages\Auth\Register
     {
         $url = Blade::render(<<<'Blade'
     @include('filament::components.link', [
-        'href' => 'https://www.consultoriac3.com.br/contrato-de-parceria',
+        'href' => '',
         'slot' => 'Contrato de Parceria',
         'target' => '_blank',
     ])
