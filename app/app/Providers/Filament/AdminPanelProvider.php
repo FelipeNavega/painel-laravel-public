@@ -30,8 +30,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->favicon('https://www.consultoriac3.com.br/wp-content/uploads/fbrfg/favicon-32x32.png')
-            ->brandLogo('https://www.consultoriac3.com.br/wp-content/webp-express/webp-images/uploads/2024/01/LOGO-9.png.webp')
+            ->favicon('https://criawebstudio.com.br/wp-content/uploads/2025/03/favicon-maua.png')
+            ->brandLogo('https://criawebstudio.com.br/wp-content/uploads/2025/03/maua-branco.png')
             ->brandLogoHeight('2.5rem')
 //            ->darkMode()
             ->id('admin')
