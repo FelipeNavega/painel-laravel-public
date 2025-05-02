@@ -91,9 +91,9 @@ class PartnerPanelProvider extends PanelProvider
                     ->icon(SimulationResource::getNavigationIcon())
                     ->isActiveWhen(fn () => request()->routeIs(SimulationResource::getRouteBaseName() . '.index'))
                     ->url(SimulationResource::getNavigationUrl()),
-                NavigationItem::make('Consulta CPF/CNPJ')
-                    ->isActiveWhen(fn () => request()?->routeIs(SimulationResource::getRouteBaseName() . '.search-document'))
-                    ->url(SimulationResource::getUrl('search-document')),
+                // NavigationItem::make('Consulta CPF/CNPJ')
+                //     ->isActiveWhen(fn () => request()?->routeIs(SimulationResource::getRouteBaseName() . '.search-document'))
+                //     ->url(SimulationResource::getUrl('search-document')),
                 NavigationItem::make(FormTypeEnum::REAL_ESTATE_CREDIT->getLabel())
                     ->isActiveWhen(fn () => request()?->routeIs(sprintf("%s.%s", $route, FormTypeEnum::REAL_ESTATE_CREDIT->value)))
                     ->url(SimulationResource::getUrl(FormTypeEnum::REAL_ESTATE_CREDIT->value)),
