@@ -26,7 +26,7 @@ class {{ class }} extends PanelProvider
             ->id('{{ id }}')
             ->path('{{ id }}')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#131199'),
             ])
             ->discoverResources(in: app_path('Filament/{{ directory }}/Resources'), for: 'App\\Filament\\{{ directory }}\\Resources')
             ->discoverPages(in: app_path('Filament/{{ directory }}/Pages'), for: 'App\\Filament\\{{ directory }}\\Pages')

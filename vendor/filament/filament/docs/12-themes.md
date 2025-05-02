@@ -18,7 +18,7 @@ public function panel(Panel $panel): Panel
             'danger' => Color::Rose,
             'gray' => Color::Gray,
             'info' => Color::Blue,
-            'primary' => Color::Indigo,
+            'primary' => Color::hex('#131199'),
             'success' => Color::Emerald,
             'warning' => Color::Orange,
         ]);
