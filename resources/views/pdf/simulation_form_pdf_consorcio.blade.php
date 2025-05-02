@@ -39,12 +39,12 @@
 </head>
 <body>  
     <?php
-        $logoPath = resource_path('views/pdf/LOGO 11.png');
+        $logoPath = resource_path('views/pdf/logo-11.webp');
         $logoBase64 = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
     ?>
     @if($logoBase64)
         <div style="text-align: center; margin-bottom: 30px;">
-            <img src="data:image/png;base64,{{ $logoBase64 }}" alt="Logo consultoriac3" width="190" height="50">
+            <img src="data:image/png;base64,{{ $logoBase64 }}" alt="Logo" width="190" height="50">
         </div>
     @else
         <p style="text-align: center;">Logo não encontrado.</p>
